@@ -16,5 +16,8 @@
       "binding": "IMAGES",
       "id": "0dc7110385ec4ce88d7061b8c16b36b9"
     }
-  ]
+  ],
+  "ai": {
+    "binding": "AI"
+  }
 }

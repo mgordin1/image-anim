@@ -1,21 +1,32 @@
 {
   "name": "image-anim",
-  "description": "A simple to-do list app built with Cloudflare Workers Assets and Remix.",
+  "version": "1.0.0",
+  "description": "A web-based image generation and transformation tool using Cloudflare Workers, Remix, and Stable Diffusion.",
+  "type": "module",
+  "engines": {
+    "node": ">=20.0.0"
+  },
   "cloudflare": {
-    "label": "To-Do List App",
-    "products": [
-      "Workers",
-      "KV"
-    ],
-    "categories": [
-      "storage"
-    ],
+    "label": "Image Generator",
+    "products": ["Workers", "KV"],
+    "categories": ["ai", "tools", "images"],
     "icon_urls": [
       "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/42c025ab-20bc-4bfe-2e7c-8660fba01600/public",
       "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/5ca0ca32-e897-4699-d4c1-6b680512f000/public"
     ],
     "docs_url": "https://developers.cloudflare.com/kv/",
     "preview_image_url": "https://imagedelivery.net/wSMYJvS3Xw-n339CbDyDIA/923473bc-a285-487c-93db-e0ddea3d3700/public"
+  },
+  "scripts": {
+    "build": "remix vite:build",
+    "dev": "remix vite:dev",
+    "deploy": "npm run build && npx wrangler deploy",
+    "preview": "npm run build && npx wrangler dev",
+    "start": "npx wrangler dev",
+    "typegen": "npx wrangler types",
+    "lint": "eslint --ignore-pattern .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
+    "typecheck": "tsc",
+    "test": "vitest"
   },
   "dependencies": {
     "@remix-run/cloudflare": "2.15.2",
@@ -42,23 +53,7 @@
     "vite": "5.4.14",
     "vite-tsconfig-paths": "5.1.4",
     "vitest": "2.1.8",
-    "wrangler": "3.107.3"
+    "wrangler": "^4.4.0"
   },
-  "engines": {
-    "node": ">=20.0.0"
-  },
-  "scripts": {
-    "build": "remix vite:build",
-    "cf-typegen": "wrangler types",
-    "deploy": "npm run build && wrangler deploy",
-    "dev": "remix vite:dev",
-    "lint": "eslint --ignore-pattern .gitignore --cache --cache-location ./node_modules/.cache/eslint .",
-    "preview": "npm run build && wrangler dev",
-    "start": "wrangler dev",
-    "test": "vitest",
-    "typecheck": "tsc",
-    "typegen": "wrangler types"
-  },
-  "sideEffects": false,
-  "type": "module"
+  "sideEffects": false
 }

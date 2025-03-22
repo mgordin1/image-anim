@@ -6,8 +6,10 @@ export default function Index() {
   const fetcher = useFetcher();
   const [baseImage, setBaseImage] = useState<string | null>(null);
   const [latestImage, setLatestImage] = useState<string | null>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   const handleGenerate = async (formData: FormData) => {
+    setIsLoading(true);
     const response = await fetch("/generate", {
       method: "POST",
       body: formData,
@@ -16,10 +18,12 @@ export default function Index() {
     const url = URL.createObjectURL(blob);
     setBaseImage(url);
     setLatestImage(url);
+    setIsLoading(false);
   };
 
   const handleDelta = async (formData: FormData) => {
     if (!baseImage) return;
+    setIsLoading(true);
     const baseBlob = await fetch(baseImage).then((res) => res.blob());
     const imgFile = new File([baseBlob], "base.png", { type: "image/png" });
     formData.set("image", imgFile);
@@ -31,6 +35,7 @@ export default function Index() {
     const blob = await response.blob();
     const url = URL.createObjectURL(blob);
     setLatestImage(url);
+    setIsLoading(false);
   };
 
   return (
@@ -65,6 +70,8 @@ export default function Index() {
             Download Latest Image
           </a>
         )}
+
+        {isLoading && <p className="text-gray-500">Generating image...</p>}
       </div>
       <div className="w-2/3 p-4">
         <div className="flex gap-4">

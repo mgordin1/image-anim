@@ -1,43 +1,35 @@
+import { Ai } from "@cloudflare/ai";
 import { ActionFunctionArgs } from "@remix-run/cloudflare";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {
-  console.log("img2img endpoint hit");
-
   try {
     const formData = await request.formData();
     const delta = formData.get("delta");
-    const image_b64 = formData.get("image_b64");
+    const imageB64 = formData.get("image_b64");
 
-    console.log("Delta prompt:", delta);
-    console.log("Image (base64):", typeof image_b64);
-
-    if (typeof delta !== "string" || typeof image_b64 !== "string") {
-      console.error("Missing delta prompt or base64 image");
-      return new Response("Missing delta prompt or base64 image", { status: 400 });
+    if (typeof delta !== "string" || typeof imageB64 !== "string") {
+      return new Response("Missing delta prompt or image data", { status: 400 });
     }
 
-    const result = await context.env.AI.run("@cf/runwayml/stable-diffusion-v1-5-img2img", {
-      prompt: delta,
-      image_b64,
-      strength: 0.75,
-      num_inference_steps: 30,
-    });
+    // Remove base64 prefix if present
+    const base64Data = imageB64.replace(/^data:image\/\w+;base64,/, "");
+    const binaryImage = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
 
-    console.log("Generation successful, returning image");
+    const ai = new Ai(context.env.AI);
+
+    const result = await ai.run("@cf/runwayml/stable-diffusion-v1-5-img2img", {
+      prompt: delta,
+      image: [...binaryImage],
+      strength: 0.75,
+      num_steps: 20, // Max allowed by Cloudflare
+    });
 
     return new Response(result, {
-      headers: {
-        "Content-Type": "image/png",
-        "Cache-Control": "no-cache, no-store, must-revalidate",
-        "Pragma": "no-cache",
-        "Expires": "0",
-      },
+      headers: { "Content-Type": "image/png" },
     });
   } catch (err: any) {
-    console.error("img2img generation failed", err);
-    return new Response(`Error generating delta image: ${err.message || "Unknown error"}`, {
-      status: 500,
-    });
+    console.error("img2img error:", err);
+    return new Response(`Error generating delta image: ${err.message}`, { status: 500 });
   }
 };
 

@@ -4,32 +4,33 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   try {
     const formData = await request.formData();
     const delta = formData.get("delta");
-    const imageB64 = formData.get("image_b64");
+    const image_b64 = formData.get("image_b64");
 
-    if (typeof delta !== "string" || typeof imageB64 !== "string") {
-      return new Response("Missing delta prompt or image data", { status: 400 });
+    if (typeof delta !== "string" || typeof image_b64 !== "string") {
+      return new Response("Missing delta prompt or base64 image", { status: 400 });
     }
 
-    // Remove base64 prefix if present
-    const base64Data = imageB64.replace(/^data:image\/\w+;base64,/, "");
-    const binaryImage = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
+    const base64Data = image_b64.replace(/^data:image\/png;base64,/, "");
 
-    const result = await context.env.AI.run(
+    const response = await context.env.AI.run(
       "@cf/runwayml/stable-diffusion-v1-5-img2img",
       {
         prompt: delta,
-        image: [...binaryImage],
-        strength: 0.75,
+        image_b64: base64Data,
+        strength: 0.8,
         num_steps: 20,
       }
     );
 
-    return new Response(result, {
-      headers: { "Content-Type": "image/png" },
+    return new Response(response, {
+      headers: {
+        "Content-Type": "image/png",
+        "Cache-Control": "no-cache",
+      },
     });
   } catch (err: any) {
-    console.error("img2img error:", err);
-    return new Response(`Error generating delta image: ${err.message}`, {
+    console.error("img2img generation failed:", err);
+    return new Response(`Error generating delta image: ${err.message || "unknown error"}`, {
       status: 500,
     });
   }

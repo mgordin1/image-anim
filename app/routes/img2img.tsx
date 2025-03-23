@@ -1,4 +1,3 @@
-import { Ai } from "@cloudflare/ai";
 import { ActionFunctionArgs } from "@remix-run/cloudflare";
 
 export const action = async ({ request, context }: ActionFunctionArgs) => {

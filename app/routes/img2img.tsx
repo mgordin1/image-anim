@@ -13,7 +13,7 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
   const imageBuffer = await image.arrayBuffer();
 
   const generated = await context.env.AI.run(
-    "@cf/stabilityai/stable-diffusion-xl-base-1.0",
+    "@cf/stabilityai/stable-diffusion-v1-5-img2img",
     {
       prompt: delta,
       image: new Uint8Array(imageBuffer),

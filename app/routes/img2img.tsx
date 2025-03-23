@@ -12,23 +12,26 @@ export const action = async ({ request, context }: ActionFunctionArgs) => {
 
     // Remove base64 prefix if present
     const base64Data = imageB64.replace(/^data:image\/\w+;base64,/, "");
-    const binaryImage = Uint8Array.from(atob(base64Data), c => c.charCodeAt(0));
+    const binaryImage = Uint8Array.from(atob(base64Data), (c) => c.charCodeAt(0));
 
-    const ai = new Ai(context.env.AI);
-
-    const result = await ai.run("@cf/runwayml/stable-diffusion-v1-5-img2img", {
-      prompt: delta,
-      image: [...binaryImage],
-      strength: 0.75,
-      num_steps: 20, // Max allowed by Cloudflare
-    });
+    const result = await context.env.AI.run(
+      "@cf/runwayml/stable-diffusion-v1-5-img2img",
+      {
+        prompt: delta,
+        image: [...binaryImage],
+        strength: 0.75,
+        num_steps: 20,
+      }
+    );
 
     return new Response(result, {
       headers: { "Content-Type": "image/png" },
     });
   } catch (err: any) {
     console.error("img2img error:", err);
-    return new Response(`Error generating delta image: ${err.message}`, { status: 500 });
+    return new Response(`Error generating delta image: ${err.message}`, {
+      status: 500,
+    });
   }
 };
 
